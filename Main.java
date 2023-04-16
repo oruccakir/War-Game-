@@ -9,6 +9,7 @@ public static void main(String[] args) throws InterruptedException {
 		int num_friends = 10;
 		
 		Game g = new Game();
+
 		Game.Enemy[] enemies = new Game.Enemy[num_enemies]; 
 		Game.Friend[] friends = new Game.Friend[num_friends]; 
 		
@@ -40,7 +41,7 @@ public static void main(String[] args) throws InterruptedException {
 			e.printStackTrace();
 		}
 
-		System.out.println(Thread.currentThread().getState());
+		
 
 	}
 }

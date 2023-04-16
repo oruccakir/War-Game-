@@ -37,8 +37,10 @@ public static void main(String[] args) throws InterruptedException {
 				friends[i].join();
 			aircraft.join();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		System.out.println(Thread.currentThread().getState());
+
 	}
 }

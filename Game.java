@@ -1,4 +1,6 @@
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import java.awt.BorderLayout;
@@ -16,7 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 
-public class Game extends JFrame implements MouseListener {
+public class Game extends JFrame{
 
     public final Object controlObject = new Object();
 
@@ -30,9 +32,15 @@ public class Game extends JFrame implements MouseListener {
 
     public AirCraft airCraft = null;
 
+    public ArrayList<Thread> airCraftFireList = null;
+
     public ArrayList <Thread> enemyList = null;
 
+    public ArrayList<Thread> enemyFireList = null;
+
     public ArrayList <Thread> friendList = null;
+
+    public ArrayList<Thread> friendFireList = null;
 
     public ArrayList<Point> pointsList = null;
 
@@ -44,15 +52,37 @@ public class Game extends JFrame implements MouseListener {
 
     public String[] directions = null;
 
-    public ReentrantLock lockFriend = null, lockEnemy = null;
+    public ReentrantLock lockMoveFriend = null, lockMoveEnemy = null, lockMoveAircraft = null;
+
+    public ReentrantLock lockFireFriend = null, lockFireEnemy = null, lockFireAircraft = null;
+
+    public Game_Pop_Up_Screen pop_up = null;
+
+    public boolean  isFired = false;
+
+    public MyThread myThread = null;
 
     public Game (){
 
-        lockFriend = new ReentrantLock();
+        lockMoveFriend = new ReentrantLock();
 
-        lockEnemy = new ReentrantLock();
+        lockFireFriend = new ReentrantLock();
+
+        lockMoveEnemy = new ReentrantLock();
+
+        lockFireEnemy = new ReentrantLock();
+
+        lockMoveAircraft = new ReentrantLock();
+
+        lockFireAircraft = new ReentrantLock();
 
         directions = new String[]{"left","right","up","down"};
+
+        airCraftFireList = new ArrayList<>();
+
+        enemyFireList = new ArrayList<>();
+
+        friendFireList = new ArrayList<>();
 
         pointsList = new ArrayList<>();
 
@@ -76,9 +106,10 @@ public class Game extends JFrame implements MouseListener {
 
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
+        this.setLocationRelativeTo(null);
+
         this.setSize(SCREEN_WIDTH,SCREEN_HEIGHT);
 
-        
     }
 
 
@@ -87,89 +118,7 @@ public class Game extends JFrame implements MouseListener {
             
     
 
-    /*public void paint(Graphics g){
-
-        super.paint(g);
-
-        Enemy tempEnemy = null;
-
-        Friend tempFriend = null;
-
-        if(firstPlacement){
-
-            setUpThePoints();
-
-            int index = 0, indexEnemy =0, indexFriend = 0;
-
-            Point pointArray[] = new Point[enemyList.size()+friendList.size()];
-
-            pointArray = pointsList.toArray(pointArray);
-
-            while(indexEnemy < enemyList.size()){
-
-                tempEnemy = (Enemy) enemyList.get(indexEnemy);
-
-                tempEnemy.enemySquare.x = pointArray[index].x;
-
-                tempEnemy.enemySquare.y = pointArray[index].y;
-
-                g.setColor(tempEnemy.enemySquare.squareColor);
-                g.fillRect(tempEnemy.enemySquare.x,tempEnemy.enemySquare.y,tempEnemy.enemySquare.width,tempEnemy.enemySquare.height);
-
-                index++;
-                indexEnemy++;
-
-            }
-
-            while(indexFriend < friendList.size()){
-
-                tempFriend = (Friend) friendList.get(indexFriend);
-
-                tempFriend.friendSquare.x = pointArray[index].x;
-
-                tempFriend.friendSquare.y = pointArray[index].y;
-
-                g.setColor(tempFriend.friendSquare.squareColor);
-                g.fillRect(tempFriend.friendSquare.x,tempFriend.friendSquare.y,tempFriend.friendSquare.width,tempFriend.friendSquare.height);
-
-                index++;
-                indexFriend++;
-
-            }
-
-            firstPlacement = false;
-
-        }
-
-        for(int i=0; i<enemyList.size(); i++){
-
-            tempEnemy = (Enemy) enemyList.get(i);
-
-            g.setColor(tempEnemy.enemySquare.squareColor);
-            g.fillRect(tempEnemy.enemySquare.x,tempEnemy.enemySquare.y,tempEnemy.enemySquare.width,tempEnemy.enemySquare.height);
-
-        }
-
-        for(int i=0; i<friendList.size(); i++){
-
-            tempFriend = (Friend) friendList.get(i);
-            
-            g.setColor(tempFriend.friendSquare.squareColor);
-            g.fillRect(tempFriend.friendSquare.x,tempFriend.friendSquare.y,tempFriend.friendSquare.width,tempFriend.friendSquare.height);
-
-        }
-
-
-        
-
-        g.setColor(airCraft.aircraftSquare.squareColor);
-        g.fillRect(airCraft.aircraftSquare.x, airCraft.aircraftSquare.y,airCraft.aircraftSquare.width,airCraft.aircraftSquare.height);
-
-        
-
-        
-
-    }*/
+    
 
 
    
@@ -202,11 +151,12 @@ public class Game extends JFrame implements MouseListener {
     }
 
 
-    public class GamePanel extends JPanel implements KeyListener{
+    public class GamePanel extends JPanel implements KeyListener ,MouseListener{
 
         public GamePanel (){
 
             this.addKeyListener(this);
+            this.addMouseListener(this);
             this.setFocusable(true);
             this.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -239,9 +189,6 @@ public class Game extends JFrame implements MouseListener {
         
                         tempEnemy.enemySquare.y = pointArray[index].y;
         
-                        /*g.setColor(tempEnemy.enemySquare.squareColor);
-                        g.fillRect(tempEnemy.enemySquare.x,tempEnemy.enemySquare.y,tempEnemy.enemySquare.width,tempEnemy.enemySquare.height);*/
-        
                         index++;
                         indexEnemy++;
         
@@ -254,9 +201,6 @@ public class Game extends JFrame implements MouseListener {
                         tempFriend.friendSquare.x = pointArray[index].x;
         
                         tempFriend.friendSquare.y = pointArray[index].y;
-        
-                        /*g.setColor(tempFriend.friendSquare.squareColor);
-                        g.fillRect(tempFriend.friendSquare.x,tempFriend.friendSquare.y,tempFriend.friendSquare.width,tempFriend.friendSquare.height);*/
         
                         index++;
                         indexFriend++;
@@ -285,20 +229,49 @@ public class Game extends JFrame implements MouseListener {
         
                 }
         
-        
-                
-        
                 g.setColor(airCraft.aircraftSquare.squareColor);
                 g.fillRect(airCraft.aircraftSquare.x, airCraft.aircraftSquare.y,airCraft.aircraftSquare.width,airCraft.aircraftSquare.height);
+
+                for(int i=0; i<airCraftFireList.size(); i++){
+
+                    Fire fire = (Fire)airCraftFireList.get(i);
+
+                    g.setColor(fire.fireSquare.squareColor);
+                    g.fillRect(fire.fireSquare.x,fire.fireSquare.y,fire.fireSquare.width,fire.fireSquare.height);
+
+                }
+
+                for(int i=0; i<enemyFireList.size(); i++){
+
+                    Fire fire = (Fire) enemyFireList.get(i);
+
+                    g.setColor(fire.fireSquare.squareColor);
+                    g.fillRect(fire.fireSquare.x,fire.fireSquare.y,fire.fireSquare.width,fire.fireSquare.height);
+
+                }
+
+                for(int i=0; i<friendFireList.size(); i++){
+
+                    Fire fire = (Fire) friendFireList.get(i);
+
+                    g.setColor(fire.fireSquare.squareColor);
+                    g.fillRect(fire.fireSquare.x,fire.fireSquare.y,fire.fireSquare.width,fire.fireSquare.height);
+
+                }
+
+                
         
             
-                System.out.println("Ebemy "+enemyList.size()+" Friend "+friendList.size());
+                //System.out.println("Enemy "+enemyList.size()+" Friend "+friendList.size());
                 
         }
 
 
         @Override
         public void keyTyped(KeyEvent e) {}
+
+        @Override
+        public void keyReleased(KeyEvent e) {}
     
         @Override
         public void keyPressed(KeyEvent e) {
@@ -348,12 +321,24 @@ public class Game extends JFrame implements MouseListener {
     
                 repaint();
             }
+
          
         }
-    
-        @Override
-        public void keyReleased(KeyEvent e) {}
 
+           @Override
+            public void mouseClicked(MouseEvent e) { isFired = true; }
+
+            @Override
+            public void mousePressed(MouseEvent e) {}
+
+            @Override
+            public void mouseReleased(MouseEvent e) {}
+
+            @Override
+            public void mouseEntered(MouseEvent e) {}
+
+           @Override
+            public void mouseExited(MouseEvent e) {}
 
 
     }
@@ -412,11 +397,9 @@ public class Game extends JFrame implements MouseListener {
 
                 Enemy tempEnemy = (Enemy) squareThread;
 
-                if(whichDirection.equals("left")) startX = tempEnemy.enemySquare.x - 5;
+                if(whichDirection.equals("left")) {startX = tempEnemy.enemySquare.x - 6; startY = tempEnemy.enemySquare.y+3;}
 
-                else if(whichDirection.equals("right")) startX = tempEnemy.enemySquare.x + tempEnemy.enemySquare.width;
-
-                startY = tempEnemy.enemySquare.y;
+                else if(whichDirection.equals("right")) {startX = tempEnemy.enemySquare.x + tempEnemy.enemySquare.width; startY = tempEnemy.enemySquare.y+3;}
 
             }
 
@@ -424,11 +407,11 @@ public class Game extends JFrame implements MouseListener {
 
                 Friend tempFriend = (Friend) squareThread;
 
-                if(whichDirection.equals("left")) startX = tempFriend.friendSquare.x- 5;
+                if(whichDirection.equals("left")) {startX = tempFriend.friendSquare.x- 6; startY = tempFriend.friendSquare.y+3;}      
 
-                else if(whichDirection.equals("right")) startX = tempFriend.friendSquare.x + tempFriend.friendSquare.width;
+                else if(whichDirection.equals("right")) {startX = tempFriend.friendSquare.x + tempFriend.friendSquare.width; startY = tempFriend.friendSquare.y+3;}
 
-                startY = tempFriend.friendSquare.y;
+                
 
             }
 
@@ -436,11 +419,9 @@ public class Game extends JFrame implements MouseListener {
                 
                 AirCraft tempAirCraft = (AirCraft) squareThread;
 
-                if(whichDirection.equals("left")) startX = tempAirCraft.aircraftSquare.x - 5;
+                if(whichDirection.equals("left")) {startX = tempAirCraft.aircraftSquare.x - 6; startY = tempAirCraft.aircraftSquare.y+3;}
 
-                else if(whichDirection.equals("right")) startX = tempAirCraft.aircraftSquare.x + tempAirCraft.aircraftSquare.width;
-
-                startY = tempAirCraft.aircraftSquare.y;
+                else if(whichDirection.equals("right")) {startX = tempAirCraft.aircraftSquare.x + tempAirCraft.aircraftSquare.width; startY = tempAirCraft.aircraftSquare.y+3;}
 
             }
 
@@ -451,8 +432,248 @@ public class Game extends JFrame implements MouseListener {
 
 
         public void run(){
-            
-            
+
+            try{
+                Thread.sleep(50);
+            }
+            catch(Exception e){
+                e.getStackTrace();
+            }
+
+        
+                if(this.fireType.equals("aircraft")){
+
+                    lockFireAircraft.lock();
+
+                    if(this.fireType.equals("left")){
+
+                        this.fireSquare.x -=10;
+
+                        if(borderControl(fireSquare) == false){
+
+                            airCraftFireList.remove(this);
+
+                            lockFireAircraft.unlock();
+
+                            return;
+
+                        }    
+
+                    }
+
+                    else if(this.fireType.equals("right")){
+
+                        this.fireSquare.x +=10;
+
+                        if(borderControl(fireSquare) == false){
+
+                            airCraftFireList.remove(this);
+
+                            lockFireAircraft.unlock();
+
+                            return;
+
+                        }
+
+
+                    }
+
+                    lockFireAircraft.unlock();
+
+
+                    lockFireAircraft.lock();
+                    lockMoveEnemy.lock();
+
+                    for(int i=0; i<enemyList.size(); i++){
+    
+                        Enemy tempEnemy = (Enemy) enemyList.get(i);
+    
+                        if(this.fireSquare.intersects(tempEnemy.enemySquare)){
+    
+                            airCraftFireList.remove(this);
+    
+                            enemyList.remove(i);
+    
+                            lockMoveEnemy.unlock();
+                            lockFireAircraft.unlock();
+                
+                            return;
+    
+                        }
+    
+                    }
+    
+                    lockMoveEnemy.unlock();
+                    lockFireAircraft.unlock();
+    
+    
+    
+    
+    
+                }
+    
+                else if(this.fireType.equals("enemy")){
+
+
+                    lockFireEnemy.lock();
+
+
+                    if(this.fireType.equals("left")){
+
+                        this.fireSquare.x -=10;
+
+                        if(borderControl(fireSquare) == false){
+
+                            enemyFireList.remove(this);
+
+                            lockFireEnemy.unlock();
+
+                            return;
+
+                        }
+
+                    }
+
+                    else if(this.fireType.equals("right")){
+
+                        this.fireSquare.x += 10;
+
+                        if(borderControl(fireSquare) == false){
+
+                            enemyFireList.remove(this);
+
+                            lockFireEnemy.unlock();
+
+                            return;
+
+                        }
+
+
+                    }
+
+                    lockFireEnemy.unlock();
+
+
+
+                    lockMoveEnemy.lock();
+                    lockMoveFriend.lock();
+                    lockFireEnemy.lock();
+
+                    for(int i=0; i<friendList.size(); i++){
+
+                            Friend tempFriend = (Friend) friendList.get(i);
+
+                            if(this.fireSquare.intersects(tempFriend.friendSquare)){
+
+                                enemyFireList.remove(this);
+
+                                friendList.remove(i);
+
+                                lockMoveEnemy.unlock();
+                                lockMoveFriend.unlock();
+                                lockFireEnemy.unlock();
+
+                            }
+
+                    }
+
+                    lockMoveEnemy.unlock();
+                    lockMoveFriend.unlock();
+                    lockFireEnemy.unlock();
+
+
+                    /*if(this.fireSquare.intersects(airCraft.aircraftSquare)){
+
+                        JOptionPane.showMessageDialog(null,"Game Finished Oyunu kaybettiniz");
+
+                        System.exit(0);
+
+                    }*/
+    
+    
+    
+                }
+    
+                else if(this.fireType.equals("friend")){
+
+                    lockFireFriend.lock();
+
+                    if(this.fireType.equals("left")){
+
+                        this.fireSquare.x -= 10;
+
+                        if(borderControl(fireSquare) == false){
+
+                            friendFireList.remove(this);
+
+                            lockFireFriend.unlock();
+
+                            return;
+
+                        }
+
+                    }
+
+                    else if(this.fireType.equals("right")){
+
+                        this.fireSquare.x +=10;
+
+                        if(borderControl(fireSquare) == false){
+
+                            friendFireList.remove(this);
+
+                            lockFireFriend.unlock();
+
+                            return;
+
+                        }
+
+                    }
+
+                    lockFireFriend.unlock();
+
+    
+
+                    lockMoveEnemy.lock();
+                    lockFireFriend.lock();
+
+                    for(int i=0; i<enemyList.size(); i++){
+
+                        Enemy tempEnemy = (Enemy)enemyList.get(i);
+
+                        if(this.fireSquare.intersects(tempEnemy.enemySquare)){
+
+                            friendFireList.remove(this);
+
+                            enemyList.remove(i);
+
+                            lockMoveEnemy.unlock();
+                            lockFireFriend.unlock();
+
+                            return;
+
+                        }
+
+                    }
+
+                    lockMoveEnemy.unlock();
+                    lockFireFriend.unlock();
+
+
+
+    
+    
+                }
+
+
+                gamePanel.repaint();
+
+                try{
+                    Thread.sleep(100);
+                }
+                catch(Exception e){
+
+                }
         }
 
 
@@ -463,34 +684,21 @@ public class Game extends JFrame implements MouseListener {
 
         public Square enemySquare;
 
-        public ArrayList<Fire> leftFires, rightFires;
-
         public Enemy (){
 
             this.setName("ENEMY THREAD");
 
             this.enemySquare = new Square(0,0,SQUARE_WIDTH,SQUARE_HEIGHT,Color.BLACK);
 
-            this.leftFires = new ArrayList<>();
-
-            this.rightFires = new ArrayList<>();
-
-
-
-
             enemyList.add(this);
 
         }
 
 
-
-
-
-
         public void run(){
 
             try{
-                Thread.sleep(500);
+                Thread.sleep(50);
             }
             catch(Exception e){
                 e.getStackTrace();
@@ -498,11 +706,27 @@ public class Game extends JFrame implements MouseListener {
 
             int randomDirection = 0;
 
+            long timeControl = 0;
+
             while(true){
+
+                lockMoveEnemy.lock();
+
+                if(this.enemySquare.intersects(airCraft.aircraftSquare)){
+
+                    //Game.this.setVisible(false);
+
+                    JOptionPane.showMessageDialog(null,"Game Finished Oyunu kaybettiniz");
+
+                    System.exit(0);
+
+                }
+
+                lockMoveEnemy.unlock();
 
                 randomDirection = random.nextInt(4);
 
-                    lockEnemy.lock();
+                    lockMoveEnemy.lock();
 
                     if(randomDirection == 0){
 
@@ -530,10 +754,12 @@ public class Game extends JFrame implements MouseListener {
 
                     }
 
-                    lockEnemy.unlock();
+                    lockMoveEnemy.unlock();
 
-                    lockFriend.lock();
-                     
+
+                    lockMoveFriend.lock();
+                    lockMoveEnemy.lock();  // added later
+                    
                     Friend tempFriend = null;
 
                     for(int i=0; i<friendList.size(); i++){
@@ -546,7 +772,8 @@ public class Game extends JFrame implements MouseListener {
 
                             enemyList.remove(this);
 
-                            lockFriend.unlock();
+                            lockMoveFriend.unlock();
+                            lockMoveEnemy.unlock(); // added later
 
                             return;
 
@@ -554,17 +781,24 @@ public class Game extends JFrame implements MouseListener {
 
                     }
 
-                    lockFriend.unlock();
+                    lockMoveFriend.unlock();
+                    lockMoveEnemy.unlock(); // added later
 
+                    lockFireEnemy.lock();
                     
-                    
+                    if(timeControl % 2 == 1){
 
+                        Fire leftFire = new Fire("enemy","left",Color.BLUE,this);
 
-                    
+                        enemyFireList.add(leftFire);
 
-                    
+                        Fire rightFire = new Fire("enemy","right",Color.BLUE,this);
 
-                    
+                        enemyFireList.add(rightFire);
+
+                    }
+
+                    lockFireEnemy.unlock();
 
                     gamePanel.repaint();
 
@@ -574,6 +808,8 @@ public class Game extends JFrame implements MouseListener {
                     catch(Exception e){
                         e.getStackTrace();
                     }
+
+                    timeControl++;
 
 
             }
@@ -589,19 +825,11 @@ public class Game extends JFrame implements MouseListener {
 
         public Square friendSquare;
 
-        public ArrayList<Fire> leftFires, rightFires;
-
         public Friend (){
 
             this.setName("FRIEND THREAD");
 
             this.friendSquare = new Square(0,0,SQUARE_WIDTH, SQUARE_HEIGHT ,Color.GREEN);
-
-            this.leftFires = new ArrayList<>();
-
-            this.rightFires = new ArrayList<>();
-
-
 
             friendList.add(this);
 
@@ -614,7 +842,7 @@ public class Game extends JFrame implements MouseListener {
         public void run(){
 
             try{
-                Thread.sleep(500);
+                Thread.sleep(50);
             }
             catch(Exception e){
                 e.getStackTrace();
@@ -622,11 +850,13 @@ public class Game extends JFrame implements MouseListener {
 
             int randomDirection = 0;
 
+            long timeControl = 0;
+
             while(true){
 
                 randomDirection = random.nextInt(4);
 
-                    lockFriend.lock();
+                    lockMoveFriend.lock();
 
                     if(randomDirection == 0){
 
@@ -654,11 +884,26 @@ public class Game extends JFrame implements MouseListener {
 
                     }
 
-                    lockFriend.unlock();
+                    lockMoveFriend.unlock();
 
                     
+                    lockFireFriend.lock();
 
+                    if(timeControl % 2 == 1){
 
+                        Fire leftFire = new Fire("friend","left",Color.MAGENTA,this);
+
+                        friendFireList.add(leftFire);
+
+                        Fire rightFire = new Fire("friend","right",Color.MAGENTA,this);
+
+                        friendFireList.add(rightFire);
+
+                    }
+
+                    lockFireFriend.unlock();
+
+                    
                     gamePanel.repaint();
 
                     try{
@@ -668,6 +913,7 @@ public class Game extends JFrame implements MouseListener {
                         e.getStackTrace();
                     }
 
+                    timeControl++;
 
 
             }
@@ -682,20 +928,11 @@ public class Game extends JFrame implements MouseListener {
 
         public Square aircraftSquare;
 
-        public ArrayList<Fire> leftFires, rightFires;
-
         public AirCraft(){
 
             this.setName("AIRCRAFT THREAD");
 
             this.aircraftSquare = new Square(250, 250, SQUARE_WIDTH, SQUARE_HEIGHT,Color.RED);
-
-            this.leftFires = new ArrayList<>();
-
-            this.rightFires = new ArrayList<>();
-
-            
-
 
             airCraft = this;
 
@@ -704,7 +941,69 @@ public class Game extends JFrame implements MouseListener {
         
         public void run(){
 
-            System.out.println("aircraft");
+            
+
+            try{
+                Thread.sleep(500);
+            }
+            catch(Exception e){
+                e.getStackTrace();
+            }
+
+            while(true){
+
+                try{
+                    Thread.sleep(5);
+                }
+                catch(Exception e){
+                    e.getStackTrace();
+                }
+
+                lockMoveEnemy.lock();
+
+                for(int i=0; i<enemyList.size(); i++){
+
+                    Enemy tempEnemy = (Enemy) enemyList.get(i);
+
+                    if(this.aircraftSquare.intersects(tempEnemy.enemySquare)){
+
+                        //Game.this.setVisible(false);
+
+                        JOptionPane.showMessageDialog(null,"Game Finished Oyunu kaybettiniz");
+
+                        System.exit(0);
+
+                    }
+
+                }
+
+                lockMoveEnemy.unlock();
+
+
+
+                lockFireAircraft.lock();
+
+               if(isFired){
+
+                   Fire leftFire = new Fire("aircraft","left",Color.ORANGE,this);
+
+                   airCraftFireList.add(leftFire);
+
+                   Fire rightFire = new Fire("aircraft","right",Color.ORANGE,this);
+
+                   airCraftFireList.add(rightFire);
+       
+                   isFired = false;
+                
+                }
+
+                lockFireAircraft.unlock();
+
+
+            
+            }
+
+
 
             
 
@@ -712,6 +1011,29 @@ public class Game extends JFrame implements MouseListener {
 
         }
         
+    }
+
+
+    public class Game_Pop_Up_Screen extends JFrame{
+
+        public JButton message = null;
+
+        public Game_Pop_Up_Screen(){
+
+            this.setTitle("GAME FINISHED");
+            this.setVisible(false);
+            this.setLayout(new BorderLayout());
+            this.setSize(75, 75);
+            this.setAlwaysOnTop(true);
+            this.setLocationRelativeTo(null);
+
+            message = new JButton("GAME INFORMATION");
+
+            this.add(message,BorderLayout.CENTER);
+
+        }
+
+
     }
 
 
@@ -752,7 +1074,7 @@ public class Game extends JFrame implements MouseListener {
 
 
     
-    public synchronized boolean  borderControl(Square square){
+    public boolean  borderControl(Square square){
 
         if(gamePanel.contains(square.x, square.y) && gamePanel.contains(square.x+square.width, square.y+square.height)) return true;
 
@@ -821,21 +1143,73 @@ public class Game extends JFrame implements MouseListener {
     }
 
 
+    public class MyThread extends Thread{
 
-    @Override
-    public void mouseClicked(MouseEvent e) {}
+        public void run(){
 
-    @Override
-    public void mousePressed(MouseEvent e) {}
+            for(int i=0; i<airCraftFireList.size(); i++)
+               airCraftFireList.get(i).start();
 
-    @Override
-    public void mouseReleased(MouseEvent e) {}
+            for(int i=0; i<enemyFireList.size(); i++)
+               enemyFireList.get(i).start();
 
-    @Override
-    public void mouseEntered(MouseEvent e) {}
+           for(int i=0; i<friendFireList.size(); i++)
+               friendFireList.get(i).start();
 
-    @Override
-    public void mouseExited(MouseEvent e) {}
+           for(int i=0; i<airCraftFireList.size(); i++){
+
+               try{
+                airCraftFireList.get(i).join();
+               }
+               catch(Exception e){
+
+               }
+
+           }
+
+           for(int i=0; i<enemyFireList.size(); i++){
+
+               try{
+                enemyFireList.get(i).join();
+               }
+               catch(Exception e){
+                
+               }
+
+           }
+
+           for(int i=0; i<friendFireList.size(); i++){
+
+               try{
+                friendFireList.get(i).join();
+               }
+               catch(Exception e){
+            
+               }
+
+
+
+           }
+
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+    
 
   
 

@@ -26,7 +26,7 @@ public static void main(String[] args) throws InterruptedException {
 		
 		for(int i=0;i<num_enemies;i++)
 			enemies[i].start();
-		
+
 		for(int i=0;i<num_friends;i++)
 			friends[i].start();
 

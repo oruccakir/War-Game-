@@ -50,17 +50,11 @@ public class Game extends JFrame{
 
     public GamePanel gamePanel = null;
 
-    public String[] directions = null;
-
     public ReentrantLock lockMoveFriend = null, lockMoveEnemy = null, lockMoveAircraft = null;
 
     public ReentrantLock lockFireFriend = null, lockFireEnemy = null, lockFireAircraft = null;
 
-    public Game_Pop_Up_Screen pop_up = null;
-
     public boolean  isFired = false;
-
-    public MyThread myThread = null;
 
     public Game (){
 
@@ -75,8 +69,6 @@ public class Game extends JFrame{
         lockMoveAircraft = new ReentrantLock();
 
         lockFireAircraft = new ReentrantLock();
-
-        directions = new String[]{"left","right","up","down"};
 
         airCraftFireList = new ArrayList<>();
 
@@ -112,16 +104,6 @@ public class Game extends JFrame{
 
     }
 
-
-       
-    
-            
-    
-
-    
-
-
-   
 
     public void setUpThePoints(){
 
@@ -344,24 +326,6 @@ public class Game extends JFrame{
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public class Square extends Rectangle{
 
         public Color squareColor;
@@ -374,6 +338,7 @@ public class Game extends JFrame{
         }
 
     }
+
 
     public class Fire extends Thread{
 
@@ -427,7 +392,6 @@ public class Game extends JFrame{
 
             this.fireSquare = new Square(startX, startY, 5,5, fireColor);
 
-            
         }
 
 
@@ -440,12 +404,13 @@ public class Game extends JFrame{
                 e.getStackTrace();
             }
 
-        
+            while(true){
+
                 if(this.fireType.equals("aircraft")){
 
                     lockFireAircraft.lock();
 
-                    if(this.fireType.equals("left")){
+                    if(this.whichDirection.equals("left")){
 
                         this.fireSquare.x -=10;
 
@@ -455,13 +420,15 @@ public class Game extends JFrame{
 
                             lockFireAircraft.unlock();
 
+                            gamePanel.repaint();
+
                             return;
 
                         }    
 
                     }
 
-                    else if(this.fireType.equals("right")){
+                    else if(this.whichDirection.equals("right")){
 
                         this.fireSquare.x +=10;
 
@@ -470,6 +437,8 @@ public class Game extends JFrame{
                             airCraftFireList.remove(this);
 
                             lockFireAircraft.unlock();
+
+                            gamePanel.repaint();
 
                             return;
 
@@ -496,6 +465,8 @@ public class Game extends JFrame{
     
                             lockMoveEnemy.unlock();
                             lockFireAircraft.unlock();
+
+                            gamePanel.repaint();
                 
                             return;
     
@@ -518,7 +489,7 @@ public class Game extends JFrame{
                     lockFireEnemy.lock();
 
 
-                    if(this.fireType.equals("left")){
+                    if(this.whichDirection.equals("left")){
 
                         this.fireSquare.x -=10;
 
@@ -528,13 +499,15 @@ public class Game extends JFrame{
 
                             lockFireEnemy.unlock();
 
+                            gamePanel.repaint();
+
                             return;
 
                         }
 
                     }
 
-                    else if(this.fireType.equals("right")){
+                    else if(this.whichDirection.equals("right")){
 
                         this.fireSquare.x += 10;
 
@@ -543,6 +516,8 @@ public class Game extends JFrame{
                             enemyFireList.remove(this);
 
                             lockFireEnemy.unlock();
+
+                            gamePanel.repaint();
 
                             return;
 
@@ -573,6 +548,10 @@ public class Game extends JFrame{
                                 lockMoveFriend.unlock();
                                 lockFireEnemy.unlock();
 
+                                gamePanel.repaint();
+
+                                return;
+
                             }
 
                     }
@@ -581,14 +560,21 @@ public class Game extends JFrame{
                     lockMoveFriend.unlock();
                     lockFireEnemy.unlock();
 
+                    lockMoveAircraft.lock();
 
-                    /*if(this.fireSquare.intersects(airCraft.aircraftSquare)){
+                    if(this.fireSquare.intersects(airCraft.aircraftSquare)){
 
-                        JOptionPane.showMessageDialog(null,"Game Finished Oyunu kaybettiniz");
+                        gamePanel.repaint();
+
+                        stopTheGame();
+
+                        JOptionPane.showMessageDialog(Game.this,"Game Finished You Lost.....!!!!!");
 
                         System.exit(0);
 
-                    }*/
+                    }
+
+                    lockMoveAircraft.unlock();
     
     
     
@@ -598,7 +584,7 @@ public class Game extends JFrame{
 
                     lockFireFriend.lock();
 
-                    if(this.fireType.equals("left")){
+                    if(this.whichDirection.equals("left")){
 
                         this.fireSquare.x -= 10;
 
@@ -608,13 +594,15 @@ public class Game extends JFrame{
 
                             lockFireFriend.unlock();
 
+                            gamePanel.repaint();
+
                             return;
 
                         }
 
                     }
 
-                    else if(this.fireType.equals("right")){
+                    else if(this.whichDirection.equals("right")){
 
                         this.fireSquare.x +=10;
 
@@ -623,6 +611,8 @@ public class Game extends JFrame{
                             friendFireList.remove(this);
 
                             lockFireFriend.unlock();
+
+                            gamePanel.repaint();
 
                             return;
 
@@ -650,6 +640,8 @@ public class Game extends JFrame{
                             lockMoveEnemy.unlock();
                             lockFireFriend.unlock();
 
+                            gamePanel.repaint();
+
                             return;
 
                         }
@@ -674,6 +666,7 @@ public class Game extends JFrame{
                 catch(Exception e){
 
                 }
+           }
         }
 
 
@@ -710,19 +703,24 @@ public class Game extends JFrame{
 
             while(true){
 
-                lockMoveEnemy.lock();
+                //lockMoveEnemy.lock();
+                lockMoveAircraft.lock();
 
                 if(this.enemySquare.intersects(airCraft.aircraftSquare)){
 
-                    //Game.this.setVisible(false);
+                    gamePanel.repaint();
 
-                    JOptionPane.showMessageDialog(null,"Game Finished Oyunu kaybettiniz");
+                    stopTheGame();
+
+                    JOptionPane.showMessageDialog(Game.this,"Game Finished You Lost.....!!!!!");
 
                     System.exit(0);
 
                 }
 
-                lockMoveEnemy.unlock();
+                lockMoveAircraft.unlock();
+
+                //lockMoveEnemy.unlock();
 
                 randomDirection = random.nextInt(4);
 
@@ -775,6 +773,8 @@ public class Game extends JFrame{
                             lockMoveFriend.unlock();
                             lockMoveEnemy.unlock(); // added later
 
+                            gamePanel.repaint();
+
                             return;
 
                         }
@@ -790,15 +790,25 @@ public class Game extends JFrame{
 
                         Fire leftFire = new Fire("enemy","left",Color.BLUE,this);
 
-                        enemyFireList.add(leftFire);
+                        if(enemyList.indexOf(this) != -1){
+                            enemyFireList.add(leftFire);
+                            leftFire.start();
+                        }
+                        
 
                         Fire rightFire = new Fire("enemy","right",Color.BLUE,this);
+                        
+                        if(enemyList.indexOf(this) != -1){
+                            enemyFireList.add(rightFire);
+                            rightFire.start();
+                        }
 
-                        enemyFireList.add(rightFire);
 
                     }
 
                     lockFireEnemy.unlock();
+
+
 
                     gamePanel.repaint();
 
@@ -893,11 +903,21 @@ public class Game extends JFrame{
 
                         Fire leftFire = new Fire("friend","left",Color.MAGENTA,this);
 
-                        friendFireList.add(leftFire);
+                        if(friendList.indexOf(this) != -1){
+
+                            friendFireList.add(leftFire);
+                            leftFire.start();
+
+                        }
 
                         Fire rightFire = new Fire("friend","right",Color.MAGENTA,this);
 
-                        friendFireList.add(rightFire);
+                        if(friendList.indexOf(this) != -1){
+
+                           friendFireList.add(rightFire);
+                           rightFire.start();
+
+                        }
 
                     }
 
@@ -959,6 +979,25 @@ public class Game extends JFrame{
                     e.getStackTrace();
                 }
 
+
+                lockMoveEnemy.lock();
+
+                if(enemyList.size() == 0){
+
+                    gamePanel.repaint();
+
+                    stopTheGame();
+
+                    JOptionPane.showMessageDialog(Game.this,"Game Finished You WIN.....!!!!!");
+
+                    System.exit(0);
+
+
+                }
+
+                lockMoveEnemy.unlock();
+
+
                 lockMoveEnemy.lock();
 
                 for(int i=0; i<enemyList.size(); i++){
@@ -967,9 +1006,11 @@ public class Game extends JFrame{
 
                     if(this.aircraftSquare.intersects(tempEnemy.enemySquare)){
 
-                        //Game.this.setVisible(false);
+                        gamePanel.repaint();
 
-                        JOptionPane.showMessageDialog(null,"Game Finished Oyunu kaybettiniz");
+                        stopTheGame();
+
+                        JOptionPane.showMessageDialog(Game.this,"Game Finished You Lost.....!!!!!");
 
                         System.exit(0);
 
@@ -989,9 +1030,13 @@ public class Game extends JFrame{
 
                    airCraftFireList.add(leftFire);
 
+                   leftFire.start();
+
                    Fire rightFire = new Fire("aircraft","right",Color.ORANGE,this);
 
                    airCraftFireList.add(rightFire);
+
+                   rightFire.start();
        
                    isFired = false;
                 
@@ -1000,40 +1045,13 @@ public class Game extends JFrame{
                 lockFireAircraft.unlock();
 
 
+
+
             
             }
 
-
-
-            
-
-            
-
         }
         
-    }
-
-
-    public class Game_Pop_Up_Screen extends JFrame{
-
-        public JButton message = null;
-
-        public Game_Pop_Up_Screen(){
-
-            this.setTitle("GAME FINISHED");
-            this.setVisible(false);
-            this.setLayout(new BorderLayout());
-            this.setSize(75, 75);
-            this.setAlwaysOnTop(true);
-            this.setLocationRelativeTo(null);
-
-            message = new JButton("GAME INFORMATION");
-
-            this.add(message,BorderLayout.CENTER);
-
-        }
-
-
     }
 
 
@@ -1073,7 +1091,6 @@ public class Game extends JFrame{
     }
 
 
-    
     public boolean  borderControl(Square square){
 
         if(gamePanel.contains(square.x, square.y) && gamePanel.contains(square.x+square.width, square.y+square.height)) return true;
@@ -1081,146 +1098,21 @@ public class Game extends JFrame{
         return false;
     }
 
-    public synchronized Thread isIntersectWithEnemy(Square square){
+    public void stopTheGame(){
 
-        Enemy tempEnemy = null;
+        lockMoveEnemy.lock();
 
-        for(int i=0; i<enemyList.size(); i++){
+        lockMoveAircraft.lock();
 
-            tempEnemy = (Enemy) enemyList.get(i);
+        lockMoveFriend.lock();
 
-            if(square.intersects(tempEnemy.enemySquare)) return tempEnemy;
+        lockFireAircraft.lock();
 
-        }
+        lockFireEnemy.lock();
 
-        return null;
-
-    }
-
-    public synchronized Thread isIntersectWithFriend(Square square){
-
-        Friend tempFriend = null;
-
-        for(int i=0; i<friendList.size(); i++){
-
-            tempFriend= (Friend) friendList.get(i);
-
-            if(square.intersects(tempFriend.friendSquare)) return tempFriend;
-            
-        }
-
-        return null;
+        lockFireFriend.lock();
 
     }
-
-    public boolean locationandIntersectionControl(Square tempSquare){
-
-        if(airCraft.aircraftSquare.intersects(tempSquare)) return false;
-
-        Enemy tempEnemy = null;
-
-        Friend tempFriend = null;
-
-        for(int i=0; i<enemyList.size(); i++){
-
-            tempEnemy = (Enemy) enemyList.get(i);
-
-            if(tempEnemy.enemySquare.intersects(tempSquare)) return false;
-
-        }
-
-        for(int i=0; i<friendList.size(); i++){
-
-            tempFriend = (Friend) friendList.get(i);
-
-            if(tempFriend.friendSquare.intersects(tempSquare)) return false;
-
-        }
-
-
-        return true;
-
-    }
-
-
-    public class MyThread extends Thread{
-
-        public void run(){
-
-            for(int i=0; i<airCraftFireList.size(); i++)
-               airCraftFireList.get(i).start();
-
-            for(int i=0; i<enemyFireList.size(); i++)
-               enemyFireList.get(i).start();
-
-           for(int i=0; i<friendFireList.size(); i++)
-               friendFireList.get(i).start();
-
-           for(int i=0; i<airCraftFireList.size(); i++){
-
-               try{
-                airCraftFireList.get(i).join();
-               }
-               catch(Exception e){
-
-               }
-
-           }
-
-           for(int i=0; i<enemyFireList.size(); i++){
-
-               try{
-                enemyFireList.get(i).join();
-               }
-               catch(Exception e){
-                
-               }
-
-           }
-
-           for(int i=0; i<friendFireList.size(); i++){
-
-               try{
-                friendFireList.get(i).join();
-               }
-               catch(Exception e){
-            
-               }
-
-
-
-           }
-
-        }
-
-    }
-
-
-
-
-
-
-
-
-
-
-
-   
-
-
-
-    
-
-  
-
-    
-
-    
-
-
-
-
-
 
 
 }

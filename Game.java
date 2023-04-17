@@ -11,6 +11,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.locks.ReentrantLock;
+
 
 
 
@@ -42,7 +44,13 @@ public class Game extends JFrame implements MouseListener {
 
     public String[] directions = null;
 
+    public ReentrantLock lockFriend = null, lockEnemy = null;
+
     public Game (){
+
+        lockFriend = new ReentrantLock();
+
+        lockEnemy = new ReentrantLock();
 
         directions = new String[]{"left","right","up","down"};
 
@@ -231,8 +239,8 @@ public class Game extends JFrame implements MouseListener {
         
                         tempEnemy.enemySquare.y = pointArray[index].y;
         
-                        g.setColor(tempEnemy.enemySquare.squareColor);
-                        g.fillRect(tempEnemy.enemySquare.x,tempEnemy.enemySquare.y,tempEnemy.enemySquare.width,tempEnemy.enemySquare.height);
+                        /*g.setColor(tempEnemy.enemySquare.squareColor);
+                        g.fillRect(tempEnemy.enemySquare.x,tempEnemy.enemySquare.y,tempEnemy.enemySquare.width,tempEnemy.enemySquare.height);*/
         
                         index++;
                         indexEnemy++;
@@ -247,8 +255,8 @@ public class Game extends JFrame implements MouseListener {
         
                         tempFriend.friendSquare.y = pointArray[index].y;
         
-                        g.setColor(tempFriend.friendSquare.squareColor);
-                        g.fillRect(tempFriend.friendSquare.x,tempFriend.friendSquare.y,tempFriend.friendSquare.width,tempFriend.friendSquare.height);
+                        /*g.setColor(tempFriend.friendSquare.squareColor);
+                        g.fillRect(tempFriend.friendSquare.x,tempFriend.friendSquare.y,tempFriend.friendSquare.width,tempFriend.friendSquare.height);*/
         
                         index++;
                         indexFriend++;
@@ -283,13 +291,9 @@ public class Game extends JFrame implements MouseListener {
                 g.setColor(airCraft.aircraftSquare.squareColor);
                 g.fillRect(airCraft.aircraftSquare.x, airCraft.aircraftSquare.y,airCraft.aircraftSquare.width,airCraft.aircraftSquare.height);
         
-                
-        
-                
-        
             
-
-
+                System.out.println("Ebemy "+enemyList.size()+" Friend "+friendList.size());
+                
         }
 
 
@@ -396,6 +400,8 @@ public class Game extends JFrame implements MouseListener {
 
         public Fire (String fireType , String whichDirection, Color fireColor,Thread squareThread){
 
+            this.setName("FIRE THREAD");
+
             this.fireType =fireType;
 
             this.whichDirection = whichDirection;
@@ -438,8 +444,8 @@ public class Game extends JFrame implements MouseListener {
 
             }
 
+            this.fireSquare = new Square(startX, startY, 5,5, fireColor);
 
-            this.fireSquare = new Square(startX, startY, 5,5, fireColor);  
             
         }
 
@@ -457,11 +463,17 @@ public class Game extends JFrame implements MouseListener {
 
         public Square enemySquare;
 
-        public Fire leftFire, rightFire;
+        public ArrayList<Fire> leftFires, rightFires;
 
         public Enemy (){
 
+            this.setName("ENEMY THREAD");
+
             this.enemySquare = new Square(0,0,SQUARE_WIDTH,SQUARE_HEIGHT,Color.BLACK);
+
+            this.leftFires = new ArrayList<>();
+
+            this.rightFires = new ArrayList<>();
 
 
 
@@ -490,7 +502,7 @@ public class Game extends JFrame implements MouseListener {
 
                 randomDirection = random.nextInt(4);
 
-                //synchronized(controlObject){
+                    lockEnemy.lock();
 
                     if(randomDirection == 0){
 
@@ -518,20 +530,35 @@ public class Game extends JFrame implements MouseListener {
 
                     }
 
+                    lockEnemy.unlock();
+
+                    lockFriend.lock();
+                     
+                    Friend tempFriend = null;
+
+                    for(int i=0; i<friendList.size(); i++){
+
+                        tempFriend = (Friend)friendList.get(i);
+
+                        if(this.enemySquare.intersects(tempFriend.friendSquare)){
+
+                            friendList.remove(i);
+
+                            enemyList.remove(this);
+
+                            lockFriend.unlock();
+
+                            return;
+
+                        }
+
+                    }
+
+                    lockFriend.unlock();
+
                     
                     
 
-                    /*Friend tempFriend = (Friend) isIntersectWithFriend(enemySquare);
-
-                    if(tempFriend != null){
-
-                        friendList.remove(tempFriend);
-    
-                        enemyList.remove(this);
-    
-                    }*/
-
-                    
 
                     
 
@@ -548,8 +575,6 @@ public class Game extends JFrame implements MouseListener {
                         e.getStackTrace();
                     }
 
-                //}
-
 
             }
 
@@ -564,11 +589,17 @@ public class Game extends JFrame implements MouseListener {
 
         public Square friendSquare;
 
-        public Fire leftFire, rightFire;
+        public ArrayList<Fire> leftFires, rightFires;
 
         public Friend (){
 
+            this.setName("FRIEND THREAD");
+
             this.friendSquare = new Square(0,0,SQUARE_WIDTH, SQUARE_HEIGHT ,Color.GREEN);
+
+            this.leftFires = new ArrayList<>();
+
+            this.rightFires = new ArrayList<>();
 
 
 
@@ -595,7 +626,7 @@ public class Game extends JFrame implements MouseListener {
 
                 randomDirection = random.nextInt(4);
 
-                //synchronized(controlObject){
+                    lockFriend.lock();
 
                     if(randomDirection == 0){
 
@@ -623,15 +654,10 @@ public class Game extends JFrame implements MouseListener {
 
                     }
 
-                    /*Enemy tempEnemy = (Enemy) isIntersectWithEnemy(friendSquare);
+                    lockFriend.unlock();
 
-                    if(tempEnemy != null){
+                    
 
-                        enemyList.remove(tempEnemy);
-
-                        friendList.remove(this);
-
-                    }*/
 
                     gamePanel.repaint();
 
@@ -642,13 +668,10 @@ public class Game extends JFrame implements MouseListener {
                         e.getStackTrace();
                     }
 
-                //}
 
 
             }
 
-            
-            
         }
 
 
@@ -659,15 +682,19 @@ public class Game extends JFrame implements MouseListener {
 
         public Square aircraftSquare;
 
-        public Fire leftFire, rightFire;
+        public ArrayList<Fire> leftFires, rightFires;
 
         public AirCraft(){
 
+            this.setName("AIRCRAFT THREAD");
+
             this.aircraftSquare = new Square(250, 250, SQUARE_WIDTH, SQUARE_HEIGHT,Color.RED);
 
-            this.leftFire = new Fire("aircraftFire", "left", Color.ORANGE, this);
+            this.leftFires = new ArrayList<>();
 
-            this.rightFire= new Fire("aircraftFire", "right", Color.ORANGE, this);
+            this.rightFires = new ArrayList<>();
+
+            
 
 
             airCraft = this;

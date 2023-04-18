@@ -2,9 +2,9 @@
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
@@ -18,9 +18,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 
-public class Game extends JFrame{
 
-    public final Object controlObject = new Object();
+public class Game extends JFrame{
 
     public final int SCREEN_WIDTH = 500;
 
@@ -82,7 +81,7 @@ public class Game extends JFrame{
 
         pointsList = new ArrayList<>();
 
-        enemyList = new ArrayList<>();
+        enemyList = new ArrayList<>(); 
 
         friendList = new ArrayList<>();
 
@@ -147,6 +146,8 @@ public class Game extends JFrame{
             this.addMouseListener(this);
             this.setFocusable(true);
             this.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+            this.setMinimumSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
+            this.setMaximumSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
 
         }
 
@@ -248,11 +249,7 @@ public class Game extends JFrame{
 
                 }
 
-            
-        
-            
-                //System.out.println("Enemy "+enemyList.size()+" Friend "+friendList.size());
-                
+
         }
 
 
@@ -445,6 +442,9 @@ public class Game extends JFrame{
 
                         if(borderControl(fireSquare) == false){
 
+                            System.out.println("Out");
+                            System.out.print(airCraftFireList.size());
+
                             airCraftFireList.remove(this);
 
                             //lockFireAircraft.unlock();
@@ -474,7 +474,6 @@ public class Game extends JFrame{
     
                             airCraftFireList.remove(this);
     
-                            
                             enemyList.remove(i);
     
                             //lockMoveEnemy.unlock();
@@ -584,7 +583,9 @@ public class Game extends JFrame{
 
                     //lockMoveAircraft.lock();
 
-                    if(this.fireSquare.intersects(airCraft.aircraftSquare)){
+                    /*if(this.fireSquare.intersects(airCraft.aircraftSquare)){
+
+                        System.out.println("Fire run control");
 
                         gamePanel.removeKeyListener(gamePanel);
 
@@ -596,7 +597,7 @@ public class Game extends JFrame{
 
                         System.exit(0);
 
-                    }
+                    }*/
 
                     //lockMoveAircraft.unlock();
     
@@ -638,7 +639,7 @@ public class Game extends JFrame{
 
                             //lockFireFriend.unlock();
 
-                            ///gamePanel.repaint();
+                            //gamePanel.repaint();
 
                             generalLock.unlock();
 
@@ -729,14 +730,16 @@ public class Game extends JFrame{
 
             long timeControl = 0;
 
-            while(true){
+            while(enemyList.contains(this)){
 
                 //lockMoveEnemy.lock();
                 //lockMoveAircraft.lock();
 
                 generalLock.lock();
 
-                if(this.enemySquare.intersects(airCraft.aircraftSquare)){
+                /*if(this.enemySquare.intersects(airCraft.aircraftSquare)){
+
+                    System.out.println("Enemy run control");
 
                     gamePanel.removeKeyListener(gamePanel);
 
@@ -748,7 +751,7 @@ public class Game extends JFrame{
 
                     System.exit(0);
 
-                }
+                }*/
 
                 //lockMoveAircraft.unlock();
                 //lockMoveEnemy.unlock();
@@ -824,18 +827,18 @@ public class Game extends JFrame{
 
                         Fire leftFire = new Fire("enemy","left",Color.BLUE,this);
 
-                        if(enemyList.indexOf(this) != -1){
+                        //if(enemyList.indexOf(this) != -1){
                             enemyFireList.add(leftFire);
                             leftFire.start();
-                        }
+                        //}
                         
 
                         Fire rightFire = new Fire("enemy","right",Color.BLUE,this);
                         
-                        if(enemyList.indexOf(this) != -1){
+                        //if(enemyList.indexOf(this) != -1){
                             enemyFireList.add(rightFire);
                             rightFire.start();
-                        }
+                        //}
 
 
                     }
@@ -898,7 +901,7 @@ public class Game extends JFrame{
 
             long timeControl = 0;
 
-            while(true){
+            while(friendList.contains(this)){
 
                 randomDirection = random.nextInt(4);
 
@@ -941,21 +944,13 @@ public class Game extends JFrame{
 
                         Fire leftFire = new Fire("friend","left",Color.MAGENTA,this);
 
-                        if(friendList.indexOf(this) != -1){
-
                             friendFireList.add(leftFire);
                             leftFire.start();
 
-                        }
-
                         Fire rightFire = new Fire("friend","right",Color.MAGENTA,this);
-
-                        if(friendList.indexOf(this) != -1){
 
                            friendFireList.add(rightFire);
                            rightFire.start();
-
-                        }
 
                     }
 
@@ -1012,12 +1007,12 @@ public class Game extends JFrame{
 
             while(true){
 
-                try{
+                /*try{
                     Thread.sleep(5);
                 }
                 catch(Exception e){
                     e.getStackTrace();
-                }
+                }*/
 
                 generalLock.lock();
 
@@ -1026,6 +1021,8 @@ public class Game extends JFrame{
                 if(enemyList.size() == 0){
 
                     gamePanel.removeKeyListener(gamePanel);
+
+                    System.out.println("Aircraft run size control");
 
                     gamePanel.repaint();
 
@@ -1049,6 +1046,8 @@ public class Game extends JFrame{
 
                     if(this.aircraftSquare.intersects(tempEnemy.enemySquare)){
 
+                        System.out.println(" aircraft run enemy square control");
+
                         gamePanel.removeKeyListener(gamePanel);
 
                         gamePanel.repaint();
@@ -1068,6 +1067,8 @@ public class Game extends JFrame{
                     Fire enemyFire = (Fire) enemyFireList.get(i);
 
                     if(this.aircraftSquare.intersects(enemyFire.fireSquare)){
+
+                        System.out.println("aircraft run enemy fire control");
 
                         gamePanel.removeKeyListener(gamePanel);
 

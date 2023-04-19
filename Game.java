@@ -442,9 +442,6 @@ public class Game extends JFrame{
 
                         if(borderControl(fireSquare) == false){
 
-                            System.out.println("Out");
-                            System.out.print(airCraftFireList.size());
-
                             airCraftFireList.remove(this);
 
                             //lockFireAircraft.unlock();
@@ -1028,9 +1025,11 @@ public class Game extends JFrame{
 
                     stopTheGame();
 
+                    
                     JOptionPane.showMessageDialog(Game.this,"Game Finished You WIN.....!!!!!");
 
                     System.exit(0);
+                    
 
 
                 }

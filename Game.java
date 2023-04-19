@@ -57,6 +57,8 @@ public class Game extends JFrame{
 
     public boolean  isFired = false;
 
+    public boolean isGameOver = false;
+
     public Game (){
 
         generalLock = new ReentrantLock();

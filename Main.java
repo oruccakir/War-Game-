@@ -5,8 +5,8 @@ public class Main{
 public static void main(String[] args) throws InterruptedException {
 		
 		
-		int num_enemies = 15;
-		int num_friends = 15;
+		int num_enemies = 4;
+		int num_friends = 4;
 		
 		Game g = new Game();
 

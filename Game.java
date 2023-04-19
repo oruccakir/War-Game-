@@ -49,31 +49,15 @@ public class Game extends JFrame{
 
     public GamePanel gamePanel = null;
 
-    public ReentrantLock lockMoveFriend = null, lockMoveEnemy = null, lockMoveAircraft = null;
-
-    public ReentrantLock lockFireFriend = null, lockFireEnemy = null, lockFireAircraft = null;
-
     public ReentrantLock generalLock = null;
 
     public boolean  isFired = false;
 
-    public boolean isGameOver = false;
+    public boolean isGameWinned = false;
 
     public Game (){
 
         generalLock = new ReentrantLock();
-
-        lockMoveFriend = new ReentrantLock();
-
-        lockFireFriend = new ReentrantLock();
-
-        lockMoveEnemy = new ReentrantLock();
-
-        lockFireEnemy = new ReentrantLock();
-
-        lockMoveAircraft = new ReentrantLock();
-
-        lockFireAircraft = new ReentrantLock();
 
         airCraftFireList = new ArrayList<>();
 
@@ -107,7 +91,7 @@ public class Game extends JFrame{
 
         this.setSize(SCREEN_WIDTH,SCREEN_HEIGHT);
 
-        this.setResizable(false);
+        //this.setResizable(false);
 
     }
 
@@ -202,7 +186,7 @@ public class Game extends JFrame{
         
                 }
 
-        
+
                 for(int i=0; i<enemyList.size(); i++){
 
                     tempEnemy = (Enemy) enemyList.get(i);
@@ -251,7 +235,7 @@ public class Game extends JFrame{
 
                 }
 
-
+            
         }
 
 
@@ -306,27 +290,27 @@ public class Game extends JFrame{
                 boolean control = borderControl(airCraft.aircraftSquare);
 
                 if(control == false) airCraft.aircraftSquare.x -= 10;
-    
+
                 repaint();
             }
 
          
         }
 
-           @Override
-            public void mouseClicked(MouseEvent e) { isFired = true; }
+        @Override
+        public void mouseClicked(MouseEvent e) { isFired = true; }
 
-            @Override
-            public void mousePressed(MouseEvent e) {}
+        @Override
+        public void mousePressed(MouseEvent e) {}
 
-            @Override
-            public void mouseReleased(MouseEvent e) {}
+        @Override
+        public void mouseReleased(MouseEvent e) {}
 
-            @Override
-            public void mouseEntered(MouseEvent e) {}
+        @Override
+        public void mouseEntered(MouseEvent e) {}
 
-           @Override
-            public void mouseExited(MouseEvent e) {}
+        @Override
+        public void mouseExited(MouseEvent e) {}
 
 
     }
@@ -416,8 +400,6 @@ public class Game extends JFrame{
 
                 if(this.fireType.equals("aircraft")){
 
-                    //lockFireAircraft.lock();
-
                     if(this.whichDirection.equals("left")){
 
                         this.fireSquare.x -=10;
@@ -426,9 +408,7 @@ public class Game extends JFrame{
 
                             airCraftFireList.remove(this);
 
-                            //lockFireAircraft.unlock();
-
-                            //gamePanel.repaint();
+                            gamePanel.repaint();
 
                             generalLock.unlock();
 
@@ -446,9 +426,7 @@ public class Game extends JFrame{
 
                             airCraftFireList.remove(this);
 
-                            //lockFireAircraft.unlock();
-
-                            //gamePanel.repaint();
+                            gamePanel.repaint();
 
                             generalLock.unlock();
 
@@ -458,12 +436,6 @@ public class Game extends JFrame{
 
 
                     }
-
-                    //lockFireAircraft.unlock();
-
-
-                    //lockFireAircraft.lock();
-                    //lockMoveEnemy.lock();
 
                     for(int i=0; i<enemyList.size(); i++){
     
@@ -475,10 +447,7 @@ public class Game extends JFrame{
     
                             enemyList.remove(i);
     
-                            //lockMoveEnemy.unlock();
-                            //lockFireAircraft.unlock();
-
-                            //gamePanel.repaint();
+                            gamePanel.repaint();
 
                             generalLock.unlock();
                 
@@ -488,20 +457,9 @@ public class Game extends JFrame{
     
                     }
     
-                    //lockMoveEnemy.unlock();
-                    //lockFireAircraft.unlock();
-    
-    
-    
-    
-    
                 }
     
                 else if(this.fireType.equals("enemy")){
-
-
-                    //lockFireEnemy.lock();
-
 
                     if(this.whichDirection.equals("left")){
 
@@ -511,9 +469,7 @@ public class Game extends JFrame{
 
                             enemyFireList.remove(this);
 
-                            //lockFireEnemy.unlock();
-
-                            //gamePanel.repaint();
+                            gamePanel.repaint();
 
                             generalLock.unlock();
 
@@ -531,9 +487,7 @@ public class Game extends JFrame{
 
                             enemyFireList.remove(this);
 
-                            //lockFireEnemy.unlock();
-
-                            //gamePanel.repaint();
+                            gamePanel.repaint();
 
                             generalLock.unlock();
 
@@ -543,14 +497,6 @@ public class Game extends JFrame{
 
 
                     }
-
-                    //lockFireEnemy.unlock();
-
-
-
-                    //lockMoveEnemy.lock();
-                    //lockMoveFriend.lock();
-                    //lockFireEnemy.lock();
 
                     for(int i=0; i<friendList.size(); i++){
 
@@ -562,11 +508,7 @@ public class Game extends JFrame{
 
                                 friendList.remove(i);
 
-                                //lockMoveEnemy.unlock();
-                                //lockMoveFriend.unlock();
-                                //lockFireEnemy.unlock();
-
-                                //gamePanel.repaint();
+                                gamePanel.repaint();
 
                                 generalLock.unlock();
 
@@ -576,37 +518,9 @@ public class Game extends JFrame{
 
                     }
 
-                    //lockMoveEnemy.unlock();
-                    //lockMoveFriend.unlock();
-                    //lockFireEnemy.unlock();
-
-                    //lockMoveAircraft.lock();
-
-                    /*if(this.fireSquare.intersects(airCraft.aircraftSquare)){
-
-                        System.out.println("Fire run control");
-
-                        gamePanel.removeKeyListener(gamePanel);
-
-                        gamePanel.repaint();
-
-                        stopTheGame();
-
-                        JOptionPane.showMessageDialog(Game.this,"Game Finished You Lost.....!!!!!");
-
-                        System.exit(0);
-
-                    }*/
-
-                    //lockMoveAircraft.unlock();
-    
-    
-    
                 }
     
                 else if(this.fireType.equals("friend")){
-
-                    //lockFireFriend.lock();
 
                     if(this.whichDirection.equals("left")){
 
@@ -616,9 +530,7 @@ public class Game extends JFrame{
 
                             friendFireList.remove(this);
 
-                            //lockFireFriend.unlock();
-
-                            //gamePanel.repaint();
+                            gamePanel.repaint();
 
                             generalLock.unlock();
 
@@ -636,9 +548,7 @@ public class Game extends JFrame{
 
                             friendFireList.remove(this);
 
-                            //lockFireFriend.unlock();
-
-                            //gamePanel.repaint();
+                            gamePanel.repaint();
 
                             generalLock.unlock();
 
@@ -648,12 +558,6 @@ public class Game extends JFrame{
 
                     }
 
-                    //lockFireFriend.unlock();
-
-    
-
-                    //lockMoveEnemy.lock();
-                    //lockFireFriend.lock();
 
                     for(int i=0; i<enemyList.size(); i++){
 
@@ -665,10 +569,7 @@ public class Game extends JFrame{
 
                             enemyList.remove(i);
 
-                            //lockMoveEnemy.unlock();
-                            //lockFireFriend.unlock();
-
-                            //gamePanel.repaint();
+                            gamePanel.repaint();
 
                             generalLock.unlock();
 
@@ -677,9 +578,6 @@ public class Game extends JFrame{
                         }
 
                     }
-
-                    //lockMoveEnemy.unlock();
-                    //ssswwlockFireFriend.unlock();
 
                 }
 
@@ -731,34 +629,9 @@ public class Game extends JFrame{
 
             while(enemyList.contains(this)){
 
-                //lockMoveEnemy.lock();
-                //lockMoveAircraft.lock();
-
                 generalLock.lock();
 
-                /*if(this.enemySquare.intersects(airCraft.aircraftSquare)){
-
-                    System.out.println("Enemy run control");
-
-                    gamePanel.removeKeyListener(gamePanel);
-
-                    gamePanel.repaint();
-
-                    stopTheGame();
-
-                    JOptionPane.showMessageDialog(Game.this,"Game Finished You Lost.....!!!!!");
-
-                    System.exit(0);
-
-                }*/
-
-                //lockMoveAircraft.unlock();
-                //lockMoveEnemy.unlock();
-
-
                 randomDirection = random.nextInt(4);
-
-                    //lockMoveEnemy.lock();
 
                     if(randomDirection == 0){
 
@@ -769,7 +642,7 @@ public class Game extends JFrame{
                     else if(randomDirection == 1){
 
                         this.enemySquare.x += 10;
-
+                        if(borderControl(enemySquare) == false) this.enemySquare.x -=10;
 
                     }
                     else if(randomDirection == 2){
@@ -785,12 +658,6 @@ public class Game extends JFrame{
 
                     }
 
-                    //lockMoveEnemy.unlock();
-
-
-                    //lockMoveFriend.lock();
-                    //lockMoveEnemy.lock();  // added later
-                    
                     Friend tempFriend = null;
 
                     for(int i=0; i<friendList.size(); i++){
@@ -803,9 +670,6 @@ public class Game extends JFrame{
 
                             enemyList.remove(this);
 
-                            //lockMoveFriend.unlock();
-                            //lockMoveEnemy.unlock(); // added later
-
                             generalLock.unlock();
 
                             gamePanel.repaint();
@@ -816,34 +680,21 @@ public class Game extends JFrame{
 
                     }
 
-                    //lockMoveFriend.unlock();
-                    //lockMoveEnemy.unlock(); // added later
-
-                    //lockFireEnemy.lock();
-                    //lockMoveEnemy.lock(); // added later
                     
                     if(timeControl % 2 == 1){
 
                         Fire leftFire = new Fire("enemy","left",Color.BLUE,this);
 
-                        //if(enemyList.indexOf(this) != -1){
                             enemyFireList.add(leftFire);
                             leftFire.start();
-                        //}
                         
-
                         Fire rightFire = new Fire("enemy","right",Color.BLUE,this);
                         
-                        //if(enemyList.indexOf(this) != -1){
                             enemyFireList.add(rightFire);
                             rightFire.start();
-                        //}
-
 
                     }
 
-                    //lockFireEnemy.unlock();
-                    //lockMoveEnemy.unlock(); // added later
 
                     generalLock.unlock();
 
@@ -884,9 +735,6 @@ public class Game extends JFrame{
         }
 
 
-
-
-
         public void run(){
 
             try{
@@ -904,7 +752,6 @@ public class Game extends JFrame{
 
                 randomDirection = random.nextInt(4);
 
-                    //lockMoveFriend.lock();
                     generalLock.lock();
 
                     if(randomDirection == 0){
@@ -933,12 +780,6 @@ public class Game extends JFrame{
 
                     }
 
-                    //lockMoveFriend.unlock();
-
-                    
-                    //lockFireFriend.lock();
-                    //lockMoveFriend.lock(); // added later
-
                     if(timeControl % 2 == 1){
 
                         Fire leftFire = new Fire("friend","left",Color.MAGENTA,this);
@@ -953,9 +794,7 @@ public class Game extends JFrame{
 
                     }
 
-                    //lockFireFriend.unlock();
-                    //lockMoveFriend.unlock(); // added later
-
+                
                     generalLock.unlock();
                     
                     gamePanel.repaint();
@@ -995,10 +834,9 @@ public class Game extends JFrame{
         
         public void run(){
 
-            
 
             try{
-                Thread.sleep(500);
+                Thread.sleep(5);
             }
             catch(Exception e){
                 e.getStackTrace();
@@ -1006,58 +844,24 @@ public class Game extends JFrame{
 
             while(true){
 
-                /*try{
-                    Thread.sleep(5);
-                }
-                catch(Exception e){
-                    e.getStackTrace();
-                }*/
-
                 generalLock.lock();
-
-                //lockMoveEnemy.lock();
 
                 if(enemyList.size() == 0){
 
-                    gamePanel.removeKeyListener(gamePanel);
-
-                    System.out.println("Aircraft run size control");
-
-                    gamePanel.repaint();
+                    isGameWinned = true;
 
                     stopTheGame();
 
-                    
-                    JOptionPane.showMessageDialog(Game.this,"Game Finished You WIN.....!!!!!");
-
-                    System.exit(0);
-                    
-
-
                 }
 
-                //lockMoveEnemy.unlock();
-
-
-                //lockMoveEnemy.lock();
-
+                
                 for(int i=0; i<enemyList.size(); i++){
 
                     Enemy tempEnemy = (Enemy) enemyList.get(i);
 
                     if(this.aircraftSquare.intersects(tempEnemy.enemySquare)){
 
-                        System.out.println(" aircraft run enemy square control");
-
-                        gamePanel.removeKeyListener(gamePanel);
-
-                        gamePanel.repaint();
-
                         stopTheGame();
-
-                        JOptionPane.showMessageDialog(Game.this,"Game Finished You Lost.....!!!!!");
-
-                        System.exit(0);
 
                     }
 
@@ -1069,28 +873,13 @@ public class Game extends JFrame{
 
                     if(this.aircraftSquare.intersects(enemyFire.fireSquare)){
 
-                        System.out.println("aircraft run enemy fire control");
-
-                        gamePanel.removeKeyListener(gamePanel);
-
-                        gamePanel.repaint();
-
                         stopTheGame();
-
-                        JOptionPane.showMessageDialog(Game.this,"Game Finished You Lost.....!!!!!");
-
-                        System.exit(0);
 
                     }
 
                 }
 
-                //lockMoveEnemy.unlock();
-
-
-
-                //lockFireAircraft.lock();
-
+        
                if(isFired){
 
                    Fire leftFire = new Fire("aircraft","left",Color.ORANGE,this);
@@ -1109,14 +898,9 @@ public class Game extends JFrame{
                 
                 }
 
-                //lockFireAircraft.unlock();
 
                 generalLock.unlock();
 
-
-
-
-            
             }
 
         }
@@ -1158,16 +942,25 @@ public class Game extends JFrame{
     }
 
 
-    public boolean  borderControl(Square square){
+    public boolean borderControl(Square square){
 
-        if(gamePanel.contains(square.x, square.y) && gamePanel.contains(square.x+square.width, square.y+square.height)) return true;
+        if(square.x >= 0 && square.x <= 470 && square.y >=0 && square.y<= 450) return true;
 
         return false;
     }
 
     public void stopTheGame(){
 
-        generalLock.lock();
+        gamePanel.removeKeyListener(gamePanel);
+
+        gamePanel.repaint();
+
+        if(isGameWinned)
+           JOptionPane.showMessageDialog(Game.this,"Game Finished You WIN.....!!!!!");
+        else
+           JOptionPane.showMessageDialog(Game.this,"Game Finished You LOST.....!!!!!");
+
+        System.exit(0);
 
     }
 

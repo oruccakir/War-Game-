@@ -956,10 +956,10 @@ public class Game extends JFrame{
         gamePanel.repaint();
 
         if(isGameWinned)
-           JOptionPane.showMessageDialog(Game.this,"Game Finished You WIN.....!!!!!");
+            JOptionPane.showMessageDialog(Game.this,"Game Finished You WIN.....!!!!!");
         else
            JOptionPane.showMessageDialog(Game.this,"Game Finished You LOST.....!!!!!");
-
+        
         System.exit(0);
 
     }
